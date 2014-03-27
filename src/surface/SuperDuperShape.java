@@ -167,7 +167,7 @@ public class SuperDuperShape extends Surface {
      * @param i_colors     An array which holds the colors for the vertical and horizontal gradient ([[[verticalColor1],[verticalColor2],...],[[horizontalColor1],[horizontalColor2]]]).
      *                     You can also use [[[verticalColor1],[verticalColor2],...],null]) to get only an vertical gradient. Note that the the color stuff only work in the OPENGL mode.
      */
-    public SuperDuperShape(PGraphics i_g, int i_phiSteps, int i_thetaSteps,
+    public SuperDuperShape(PApplet i_g, int i_phiSteps, int i_thetaSteps,
                            float n1_1, float n1_2, float n1_3, float m1_1,
                            float n2_1, float n2_2, float n2_3, float m2_1,
                            float c1, float c2, float c3,
@@ -203,13 +203,13 @@ public class SuperDuperShape extends Surface {
      * @param d1
      * @param d2
      */
-    public SuperDuperShape(PGraphics i_g, int i_phiSteps, int i_thetaSteps,
+    public SuperDuperShape(PApplet i_g, int i_phiSteps, int i_thetaSteps,
                            float n1_1, float n1_2, float n1_3, float m1_1,
                            float n2_1, float n2_2, float n2_3, float m2_1,
                            float c1, float c2, float c3,
                            float t1, float t2, float d1, float d2) {
         this(
-                i_g, i_thetaSteps, i_thetaSteps, n1_1, n1_2, n1_3, m1_1,
+                i_g, i_phiSteps, i_thetaSteps, n1_1, n1_2, n1_3, m1_1,
                 n2_1, n2_2, n2_3, m2_1,
                 c1, c2, c3,
                 t1, t2, d1, d2,
@@ -218,7 +218,7 @@ public class SuperDuperShape extends Surface {
     }
 
 
-    public SuperDuperShape(PGraphics i_g, int i_phiSteps, int i_thetaSteps,
+    public SuperDuperShape(PApplet i_g, int i_phiSteps, int i_thetaSteps,
                            SuperShapePreset r1, SuperShapePreset r2,
                            float c1, float c2, float c3,
                            float t1, float t2, float d1, float d2) {

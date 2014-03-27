@@ -1,5 +1,6 @@
 package surface;
 
+import processing.core.PApplet;
 import processing.core.PGraphics;
 
 import surface.calculation.CosinusTable;
@@ -49,7 +50,7 @@ public class SphereHarmonics extends Surface {
      * @param i_preset,    An array with 8 floats s
      */
     public SphereHarmonics(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final float[] i_preset,
@@ -66,7 +67,7 @@ public class SphereHarmonics extends Surface {
     }
 
     public SphereHarmonics(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final float[] i_preset
@@ -83,7 +84,7 @@ public class SphereHarmonics extends Surface {
     }
 
     public SphereHarmonics(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps
     ) {
@@ -97,7 +98,7 @@ public class SphereHarmonics extends Surface {
     }
 
     public SphereHarmonics(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final int[][] i_colors

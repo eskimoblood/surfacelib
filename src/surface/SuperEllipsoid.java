@@ -1,5 +1,6 @@
 package surface;
 
+import processing.core.PApplet;
 import processing.core.PGraphics;
 import surface.calculation.CosinusTable;
 import surface.calculation.LookUpTable;
@@ -30,7 +31,7 @@ public class SuperEllipsoid extends Surface {
      *                     You can also use [[[verticalColor1],[verticalColor2],...],null]) to get only an vertical gradient. Note that the the color stuff only work in the OPENGL mode.
      */
     public SuperEllipsoid(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final float i_N1,
@@ -47,7 +48,7 @@ public class SuperEllipsoid extends Surface {
     }
 
     public SuperEllipsoid(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final float i_N1,
@@ -63,7 +64,7 @@ public class SuperEllipsoid extends Surface {
     }
 
     public SuperEllipsoid(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final int[][] i_colors) {
@@ -78,7 +79,7 @@ public class SuperEllipsoid extends Surface {
     }
 
     public SuperEllipsoid(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps) {
 

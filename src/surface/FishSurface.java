@@ -1,5 +1,6 @@
 package surface;
 
+import processing.core.PApplet;
 import processing.core.PGraphics;
 import surface.calculation.CosinusMultiplyTable;
 import surface.calculation.CosinusTable;
@@ -37,13 +38,13 @@ public class FishSurface extends Surface {
      *                     vertical gradient. Note that the the color stuff only work in
      *                     the OPENGL mode.
      */
-    public FishSurface(final PGraphics i_g, final int i_phiSteps,
+    public FishSurface(final PApplet i_g, final int i_phiSteps,
                        final int i_thetaSteps, int[][] i_colors) {
 
         super(i_g, i_phiSteps, i_thetaSteps, 0, PI, 0, TWO_PI, null, i_colors);
     }
 
-    public FishSurface(final PGraphics i_g, final int i_phiSteps,
+    public FishSurface(final PApplet i_g, final int i_phiSteps,
                        final int i_thetaSteps) {
 
         this(i_g, i_phiSteps, i_thetaSteps, null);

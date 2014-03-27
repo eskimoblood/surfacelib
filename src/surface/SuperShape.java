@@ -1,10 +1,11 @@
 package surface;
 
+import processing.core.PApplet;
 import processing.core.PGraphics;
 
 public class SuperShape extends SuperDuperShape {
 
-    public SuperShape(PGraphics i_g, int i_phiSteps, int i_thetaSteps) {
+    public SuperShape(PApplet i_g, int i_phiSteps, int i_thetaSteps) {
         this(
                 i_g,
                 i_phiSteps,
@@ -13,7 +14,7 @@ public class SuperShape extends SuperDuperShape {
         );
     }
 
-    public SuperShape(PGraphics i_g, int i_phiSteps, int i_thetaSteps, int[][] i_colors) {
+    public SuperShape(PApplet i_g, int i_phiSteps, int i_thetaSteps, int[][] i_colors) {
         this(
                 i_g,
                 i_phiSteps,
@@ -33,7 +34,7 @@ public class SuperShape extends SuperDuperShape {
     }
 
 
-    public SuperShape(PGraphics i_g, int i_phiSteps, int i_thetaSteps,
+    public SuperShape(PApplet i_g, int i_phiSteps, int i_thetaSteps,
                       float n1_1, float n1_2, float n1_3, float m1_1,
                       float n2_1, float n2_2, float n2_3, float m2_1) {
         this(
@@ -44,7 +45,7 @@ public class SuperShape extends SuperDuperShape {
         );
     }
 
-    public SuperShape(PGraphics i_g, int i_phiSteps, int i_thetaSteps,
+    public SuperShape(PApplet i_g, int i_phiSteps, int i_thetaSteps,
                       SuperShapePreset r1,
                       SuperShapePreset r2) {
         this(
@@ -55,7 +56,7 @@ public class SuperShape extends SuperDuperShape {
         );
     }
 
-    public SuperShape(PGraphics i_g, int i_phiSteps, int i_thetaSteps,
+    public SuperShape(PApplet i_g, int i_phiSteps, int i_thetaSteps,
                       SuperShapePreset r1,
                       SuperShapePreset r2,
                       int[][] i_colors) {
@@ -67,7 +68,7 @@ public class SuperShape extends SuperDuperShape {
         );
     }
 
-    public SuperShape(PGraphics i_g, int i_phiSteps, int i_thetaSteps,
+    public SuperShape(PApplet i_g, int i_phiSteps, int i_thetaSteps,
                       float n1_1, float n1_2, float n1_3, float m1_1,
                       float n2_1, float n2_2, float n2_3, float m2_1, int[][] i_colors) {
         super(

@@ -1,5 +1,6 @@
 package surface;
 
+import processing.core.PApplet;
 import processing.core.PGraphics;
 import surface.calculation.CosinusMultiplyTable;
 import surface.calculation.CosinusTable;
@@ -34,7 +35,7 @@ public class MoebiusStrip extends Surface {
      */
 
     public MoebiusStrip(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final float i_innerRadius,
@@ -58,7 +59,7 @@ public class MoebiusStrip extends Surface {
      * @param i_thetaSteps The vertical resolution of the surface.
      */
     public MoebiusStrip(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps
     ) {
@@ -68,7 +69,7 @@ public class MoebiusStrip extends Surface {
     }
 
     public MoebiusStrip(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final int[][] i_colors
@@ -79,7 +80,7 @@ public class MoebiusStrip extends Surface {
     }
 
     public MoebiusStrip(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final float i_innerRadius

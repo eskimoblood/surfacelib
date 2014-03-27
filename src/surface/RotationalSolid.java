@@ -1,5 +1,6 @@
 package surface;
 
+import processing.core.PApplet;
 import processing.core.PGraphics;
 import surface.calculation.CosinusTable;
 import surface.calculation.LookUpTable;
@@ -30,7 +31,7 @@ public class RotationalSolid extends Surface {
      *                   You can also use [[[verticalColor1],[verticalColor2],...],null]) to get only an vertical gradient. Note that the the color stuff only work in the OPENGL mode.
      */
     public RotationalSolid(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final float[] i_Points,
             final int[][] i_colors) {
@@ -47,7 +48,7 @@ public class RotationalSolid extends Surface {
     }
 
     public RotationalSolid(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final float[] i_Points) {
 

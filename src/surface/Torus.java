@@ -1,5 +1,6 @@
 package surface;
 
+import processing.core.PApplet;
 import processing.core.PGraphics;
 import surface.calculation.CosinusTable;
 import surface.calculation.LookUpTable;
@@ -25,7 +26,7 @@ public class Torus extends Surface {
      * @param i_thetaSteps The vertical resolution of the surface.
      */
     public Torus(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps) {
 
@@ -43,7 +44,7 @@ public class Torus extends Surface {
      *                 You can also use [[[verticalColor1],[verticalColor2],...],null]) to get only an vertical gradient. Note that the the color stuff only work in the OPENGL mode.
      */
     public Torus(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final int[][] i_colors) {
@@ -67,7 +68,7 @@ public class Torus extends Surface {
      *                      The default value is 1.
      */
     public Torus(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final float i_innerRadius,
@@ -82,7 +83,7 @@ public class Torus extends Surface {
     }
 
     public Torus(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final float i_innerRadius,
