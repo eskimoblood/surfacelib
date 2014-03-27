@@ -1,5 +1,7 @@
 package surface;
 
+import processing.core.PApplet;
+
 import java.util.Arrays;
 
 /**
@@ -27,13 +29,10 @@ public class SurfaceMorpher extends Surface {
      * @param i_surface1 Surface, surface for blend value 0
      * @param i_surface2 Surface, surface for blend value 1
      */
-    public SurfaceMorpher(
-            final Surface i_surface1,
-            final Surface i_surface2
+    public SurfaceMorpher(final Surface i_surface1,
+                          final Surface i_surface2
     ) {
-        super(
-                i_surface1
-        );
+        super(i_surface1);
         surface1 = i_surface1;
         surface2 = i_surface2;
     }

@@ -2,10 +2,7 @@ package surface;
 
 import java.util.Arrays;
 
-import processing.core.PConstants;
-import processing.core.PGraphics;
-import processing.core.PImage;
-import processing.core.PVector;
+import processing.core.*;
 
 /**
  * This is the basic surface class all the other surface extend from.
@@ -49,6 +46,8 @@ public class Surface {
             return 0;
     }
 
+    private PApplet p;
+
     protected final int phiSteps;
 
     protected final int thetaSteps;
@@ -71,8 +70,6 @@ public class Surface {
 
     protected float[][][] pointScaleDifference;
 
-    final protected PGraphics g;
-
     protected final float[][][] coords;
 
     protected final float[] bounds;
@@ -87,8 +84,7 @@ public class Surface {
 
 
     /**
-     * @param i_g          a PGraphics Object where your surface will drawn on, mainly
-     *                     this is g
+     * @param pApplet
      * @param i_phiSteps   the horizontal resolution of your surface
      * @param i_thetaSteps the vertical resolution of your surface
      * @param i_minTheta   the minimal value of theta
@@ -96,11 +92,11 @@ public class Surface {
      * @param i_minPhi     the minimal value of phi
      * @param i_maxPhi     the maximal value of phi
      * @param i_parameter  some surface, like SuperShapes or the SnailSurface, can be
-     *                     initialized with different parameters
      */
-    public Surface(final PGraphics i_g, final int i_phiSteps, final int i_thetaSteps, final float i_minTheta, final float i_maxTheta, final float i_minPhi, final float i_maxPhi,
+    public Surface(PApplet pApplet, final int i_phiSteps, final int i_thetaSteps, final float i_minTheta, final float i_maxTheta, final float i_minPhi, final float i_maxPhi,
                    final float[] i_parameter, int[][] i_colors) {
-        g = i_g;
+
+        this.p = pApplet;
         phiSteps = i_phiSteps;
         thetaSteps = i_thetaSteps;
 
@@ -108,6 +104,10 @@ public class Surface {
         maxTheta = i_maxTheta;
         minPhi = i_minPhi;
         maxPhi = i_maxPhi;
+
+        xScale = 1;
+        yScale = 1;
+        zScale = 1;
 
         parameter = i_parameter;
 
@@ -142,7 +142,7 @@ public class Surface {
      * @param i_surface
      */
     public Surface(final Surface i_surface) {
-        this(i_surface.g, i_surface.phiSteps, i_surface.thetaSteps, i_surface.maxTheta, i_surface.maxTheta, i_surface.minPhi, i_surface.minPhi, i_surface.parameter, null);
+        this(i_surface.p, i_surface.phiSteps, i_surface.thetaSteps, i_surface.maxTheta, i_surface.maxTheta, i_surface.minPhi, i_surface.minPhi, i_surface.parameter, null);
 
         for (int phiStep = 0; phiStep < phiSteps; phiStep++) {
             for (int thetaStep = 0; thetaStep < thetaSteps; thetaStep++) {
@@ -382,9 +382,9 @@ public class Surface {
      * Calculates the coordinates of the surface
      */
     protected void setSurface() {
-        float x = 0;
-        float y = 0;
-        float z = 0;
+        float x;
+        float y;
+        float z;
 
         for (int phiStep = 0; phiStep < phiSteps; phiStep++) {
             for (int thetaStep = 0; thetaStep < thetaSteps; thetaStep++) {
@@ -409,7 +409,6 @@ public class Surface {
                 coords[phiStep][thetaStep][0] = x;
                 coords[phiStep][thetaStep][1] = y;
                 coords[phiStep][thetaStep][2] = z;
-
             }
         }
         if (mesh != null) {
@@ -455,6 +454,21 @@ public class Surface {
         } catch (java.lang.IndexOutOfBoundsException e) {
             System.out.println("It seems that the size of our array not match the size of the color array");
         }
+    }
+
+    public void initColors(int color) {
+        int[] colors = new int[1];
+        colors[0] = color;
+        initColors(colors, colors);
+    }
+
+    public void initColors(int i_horizontalColor, int i_verticalColor) {
+        int[] colorsH = new int[1];
+        colorsH[0] = i_horizontalColor;
+
+        int[] colorsV = new int[1];
+        colorsV[0] = i_verticalColor;
+        initColors(colorsH, colorsV);
     }
 
     /**
@@ -565,7 +579,7 @@ public class Surface {
 
     /**
      * @param i_texMode The way the texture is used by the surface. "TILE" let the
-     *                  texture draw on every quad of the surface. "WHOLE" will
+     *                  texture getSurface on every quad of the surface. "WHOLE" will
      *                  spreading the texture over the entire surface.
      */
     public void setTexture(PImage i_tex, String i_texMode) {
@@ -577,7 +591,7 @@ public class Surface {
      * Set the way the texture is used by the surface.
      *
      * @param i_texMode The way the texture is used by the surface. "TILE" let the
-     *                  texture draw on every quad of the surface. "WHOLE" will
+     *                  texture getSurface on every quad of the surface. "WHOLE" will
      *                  spreading the texture over the entire surface.
      */
     public void setTextureMode(String i_texMode) {
@@ -628,18 +642,24 @@ public class Surface {
      * with colors, this colors will be used for stroke and fill otherwise the
      * latest fill and stroke settings will be applied. Use noStroke or noFill
      * before this methode to hide fills or strokes.
-     *
      */
-    public void draw() {
+    public PShape getSurface() {
+        PShape shape = createShape();
         for (int i = 0; i < phiSteps; i++) {
-            drawVerticalStrip(i);
+            getVerticalStrip(shape, i);
         }
+        return shape;
+    }
+
+    private PShape createShape() {
+        PShape shape = p.createShape(PConstants.GROUP);
+        return shape;
     }
 
     /**
      * Draws the part of the surface between the passing bounding. If you wanna
-     * draw a hemisphere of your sphere surface for example you have to call
-     * drawPart(0,phiSteps,0,thetaSteps/2).
+     * getSurface a hemisphere of your sphere surface for example you have to call
+     * getPart(0,phiSteps,0,thetaSteps/2).
      *
      * @param i_startIndexPhi   a value between 0 and the phiSteps your surface was
      *                          initialized with
@@ -650,8 +670,12 @@ public class Surface {
      * @param i_endIndexTheta   a value between i_startIndexTheta and the thetaSteps your
      *                          surface was initialized with
      */
-    public void drawPart(final int i_startIndexPhi, final int i_endIndexPhi, final int i_startIndexTheta, final int i_endIndexTheta) {
-        drawPart(i_startIndexPhi, i_endIndexPhi, i_startIndexTheta, i_endIndexTheta, 1, 1);
+    public PShape getPart(final int i_startIndexPhi, final int i_endIndexPhi, final int i_startIndexTheta, final int i_endIndexTheta) {
+        return getPart(i_startIndexPhi, i_endIndexPhi, i_startIndexTheta, i_endIndexTheta, 1, 1);
+    }
+
+    public PShape getPart(PShape shape, final int i_startIndexPhi, final int i_endIndexPhi, final int i_startIndexTheta, final int i_endIndexTheta) {
+        return getPart(shape, i_startIndexPhi, i_endIndexPhi, i_startIndexTheta, i_endIndexTheta, 1, 1);
     }
 
     /**
@@ -668,29 +692,38 @@ public class Surface {
      * @param i_stepTheta       the steps size for theta; if j is 1 every segment will be
      *                          drawn if its 2 only every second an so on
      */
-    public void drawPart(final int i_startIndexPhi, final int i_endIndexPhi, final int i_startIndexTheta, final int i_endIndexTheta, final int i_stepPhi, final int i_stepTheta) {
+    public PShape getPart(final int i_startIndexPhi, final int i_endIndexPhi, final int i_startIndexTheta, final int i_endIndexTheta, final int i_stepPhi, final int i_stepTheta) {
+        return getPart(null, i_startIndexPhi, i_endIndexPhi, i_startIndexTheta, i_endIndexTheta);
+    }
+
+    public PShape getPart(PShape shape, final int i_startIndexPhi, final int i_endIndexPhi, final int i_startIndexTheta, final int i_endIndexTheta, final int i_stepPhi, final int i_stepTheta) {
+        if (shape == null) {
+            shape = createShape();
+        }
         for (int i = i_startIndexPhi; i < i_endIndexPhi; i += i_stepPhi) {
             for (int j = i_startIndexTheta; j < i_endIndexTheta; j += i_stepTheta) {
-                drawHorizontalSegment(i, j, i + 2, j + 2);
+                getHorizontalSegment(shape, i, j, i + 2, j + 2);
             }
         }
+
+        return shape;
     }
 
     /**
      * This draws a horizontal strip of the surface.
      *
-     * @param i_indexTheta The number of the Strip you wanna draw. The number must lie in
+     * @param i_indexTheta The number of the Strip you wanna getSurface. The number must lie in
      *                     between 0 and the theatSteps your surface was initialized
      *                     with.
      */
-    public void drawHorizontalStrip(final int i_indexTheta) {
-        drawHorizontalSegment(0, i_indexTheta, phiSteps, i_indexTheta + 2);
+    public PShape getHorizontalStrip(final int i_indexTheta) {
+        return getHorizontalSegment(0, i_indexTheta, phiSteps, i_indexTheta + 2);
     }
 
     /**
      * Draws a horizontal strip at j between i_startIndexPhi and i_endIndexPhi
      *
-     * @param i_indexTheta    The number of the Strip you wanna draw. The number must lie in
+     * @param i_indexTheta    The number of the Strip you wanna getSurface. The number must lie in
      *                        between 0 and the theatSteps your surface was initialized
      *                        with.
      * @param i_startIndexPhi Number of the first vertical element. The number must lie in
@@ -699,27 +732,26 @@ public class Surface {
      *                        between i_startIndexPhi and the phiSteps your surface was
      *                        initialized with.
      */
-    public void drawHorizontalStrip(final int i_indexTheta, final int i_startIndexPhi, final int i_endIndexPhi) {
-        drawHorizontalSegment(i_startIndexPhi, i_indexTheta, i_endIndexPhi, i_indexTheta + 2);
+    public PShape getHorizontalStrip(final int i_indexTheta, final int i_startIndexPhi, final int i_endIndexPhi) {
+        return getHorizontalSegment(i_startIndexPhi, i_indexTheta, i_endIndexPhi, i_indexTheta + 2);
     }
 
     /**
      * Draws a horizontal strip between two surfaces with different radiuses.
      *
-     * @param i_indexTheta The number of the Strip you wanna draw. The number must lie in
+     * @param i_indexTheta The number of the Strip you wanna getSurface. The number must lie in
      *                     between 0 and the theatSteps your surface was initialized
      *                     with.
      * @param i_radius     The radius of the inner surface.
-
      */
-    public void drawHorizontalStrip(final int i_indexTheta, final float i_radius) {
-        drawHorizontalSegment(i_indexTheta, 0, phiSteps, i_radius);
+    public PShape getHorizontalStrip(final int i_indexTheta, final float i_radius) {
+        return getHorizontalSegment(i_indexTheta, 0, phiSteps, i_radius);
     }
 
     /**
      * Draws a vertical strip between two surfaces with different radiuses.
      *
-     * @param i_indexTheta    The number of the Strip you wanna draw. The number must lie in
+     * @param i_indexTheta    The number of the Strip you wanna getSurface. The number must lie in
      *                        between 0 and the theatSteps your surface was initialized
      *                        with.
      * @param i_startIndexPhi Number of the first vertical element. The number must lie in
@@ -729,13 +761,17 @@ public class Surface {
      *                        initialized with.
      * @param i_radius        Width of the strip.
      */
-    public void drawHorizontalStrip(final int i_indexTheta, final int i_startIndexPhi, final int i_endIndexPhi, final float i_radius) {
-        drawHorizontalSegment(i_indexTheta, i_startIndexPhi, i_endIndexPhi, i_radius);
+    public PShape getHorizontalStrip(final int i_indexTheta, final int i_startIndexPhi, final int i_endIndexPhi, final float i_radius) {
+        return getHorizontalStrip(null, i_indexTheta, i_startIndexPhi, i_endIndexPhi, i_radius);
+    }
+
+    public PShape getHorizontalStrip(PShape shape, final int i_indexTheta, final int i_startIndexPhi, final int i_endIndexPhi, final float i_radius) {
+        return getHorizontalSegment(shape, i_indexTheta, i_startIndexPhi, i_endIndexPhi, i_radius);
     }
 
     /**
      * Draws horizontal Segments between the given parameters. This is called by
-     * drawPart() and drawHorizontalStrip().
+     * getPart() and getHorizontalStrip().
      *
      * @param i_startIndexPhi   Number of the first vertical element. The number must lie in
      *                          between 0 and the phiSteps your surface was initialized with.
@@ -749,15 +785,27 @@ public class Surface {
      *                          between i_startIndexTheta and the thetaSteps your surface was
      *                          initialized with.
      */
-    public void drawHorizontalSegment(int i_startIndexPhi, int i_startIndexTheta, int i_endIndexPhi, int i_endIndexTheta) {
+    public PShape getHorizontalSegment(int i_startIndexPhi, int i_startIndexTheta, int i_endIndexPhi, int i_endIndexTheta) {
+        return getHorizontalSegment(null, i_startIndexPhi, i_startIndexTheta, i_endIndexPhi, i_endIndexTheta);
+    }
+
+    private PShape getHorizontalSegment(PShape shape, int i_startIndexPhi, int i_startIndexTheta, int i_endIndexPhi, int i_endIndexTheta) {
+
+        if (shape == null) {
+            shape = createShape();
+        }
+        PShape child = p.createShape();
+
         i_startIndexPhi = Math.max(0, i_startIndexPhi);
         i_startIndexTheta = Math.max(0, i_startIndexTheta);
         i_endIndexPhi = Math.min(i_endIndexPhi, phiSteps);
         i_endIndexTheta = Math.min(i_endIndexTheta, thetaSteps);
 
-        g.beginShape(PConstants.QUAD_STRIP);
+        child.beginShape(PConstants.QUAD_STRIP);
+        child.noStroke();
+
         if (tex != null)
-            g.texture(tex);
+            child.texture(tex);
 
         PVector[][] normals = null;
         if (mesh != null) {
@@ -773,50 +821,47 @@ public class Surface {
                 float x2 = coords[i][j + 1][0] * (xScale + pointScaleDifference[i][j + 1][0]);
                 float y2 = coords[i][j + 1][1] * (yScale + pointScaleDifference[i][j + 1][1]);
                 float z2 = coords[i][j + 1][2] * (zScale + pointScaleDifference[i][j + 1][2]);
-                if (colors != null) {
-                    if (g.fill)
-                        g.fill(colors[i][j]);
-                    if (g.stroke)
-                        g.stroke(colors[i][j]);
 
+
+                if (colors != null) {
+                    child.fill(colors[i][j]);
                 }
                 if (normals != null) {
                     PVector n = normals[i][j];
-                    g.normal(n.x, n.y, n.z);
+                    child.normal(n.x, n.y, n.z);
                 }
                 if (tex == null) {
-                    g.vertex(x1, y1, z1);
+                    child.vertex(x1, y1, z1);
                 } else {
                     if (texMode == 0) {
-                        g.vertex(x1, y1, z1, (tex.width - 3) * (i % 2) + 1, 2);
+                        child.vertex(x1, y1, z1, (tex.width - 3) * (i % 2) + 1, 2);
                     } else {
-                        g.vertex(x1, y1, z1, (tex.width / ((float) phiSteps - 1)) * i, (tex.height / ((float) thetaSteps - 1)) * j);
+                        child.vertex(x1, y1, z1, (tex.width / ((float) phiSteps - 1)) * i, (tex.height / ((float) thetaSteps - 1)) * j);
                     }
                 }
 
                 if (colors != null) {
-                    if (g.fill)
-                        g.fill(colors[i][j + 1]);
-                    if (g.stroke)
-                        g.stroke(colors[i][j + 1]);
+                    child.fill(colors[i][j + 1]);
                 }
                 if (normals != null) {
                     PVector n = normals[i][j + 1];
-                    g.normal(n.x, n.y, n.z);
+                    child.normal(n.x, n.y, n.z);
                 }
                 if (tex == null) {
-                    g.vertex(x2, y2, z2);
+                    child.vertex(x2, y2, z2);
                 } else {
                     if (texMode == 0) {
-                        g.vertex(x2, y2, z2, (tex.width - 3) * (i % 2) + 1, tex.height - 2);
+                        child.vertex(x2, y2, z2, (tex.width - 3) * (i % 2) + 1, tex.height - 2);
                     } else {
-                        g.vertex(x2, y2, z2, (tex.width / ((float) phiSteps - 1)) * i, (tex.height / ((float) thetaSteps - 1)) * (j + 1));
+                        child.vertex(x2, y2, z2, (tex.width / ((float) phiSteps - 1)) * i, (tex.height / ((float) thetaSteps - 1)) * (j + 1));
                     }
                 }
 
             }
         }
-        g.endShape();
+        child.endShape();
+        shape.addChild(child);
+        return shape;
     }
 
     /**
@@ -828,14 +873,26 @@ public class Surface {
      *                        phiSteps your surface was initialized with.
      * @param i_radius        The radius of the inner surface.
      */
-    public void drawHorizontalSegment(int i_stripNumber, int i_startIndexPhi, int i_endIndexPhi, final float i_radius) {
+    public PShape getHorizontalSegment(int i_stripNumber, int i_startIndexPhi, int i_endIndexPhi, final float i_radius) {
+        return getHorizontalSegment(null, i_stripNumber, i_startIndexPhi, i_endIndexPhi, i_radius);
+    }
+
+    private PShape getHorizontalSegment(PShape shape, int i_stripNumber, int i_startIndexPhi, int i_endIndexPhi, final float i_radius) {
+
+        if (shape == null) {
+            shape = createShape();
+        }
+
+        PShape child = p.createShape();
         i_stripNumber = Math.min(Math.max(0, i_stripNumber), thetaSteps - 1);
         i_startIndexPhi = Math.max(0, i_startIndexPhi);
         i_endIndexPhi = Math.min(i_endIndexPhi, phiSteps);
 
-        g.beginShape(PConstants.QUAD_STRIP);
+        child.beginShape(PConstants.QUAD_STRIP);
+        child.noStroke();
+
         if (tex != null)
-            g.texture(tex);
+            child.texture(tex);
 
         for (int i = i_startIndexPhi; i < i_endIndexPhi; i++) {
 
@@ -847,54 +904,57 @@ public class Surface {
             float y2 = coords[i][i_stripNumber][1] * (yScale + pointScaleDifference[i][i_stripNumber][1] + i_radius);
             float z2 = coords[i][i_stripNumber][2] * (zScale + pointScaleDifference[i][i_stripNumber][2] + i_radius);
             if (colors != null) {
-                if (g.fill)
-                    g.fill(colors[i][i_stripNumber]);
-                if (g.stroke)
-                    g.stroke(colors[i][i_stripNumber]);
+                child.fill(colors[i][i_stripNumber]);
             }
             if (tex == null) {
-                g.vertex(x1, y1, z1);
+                child.vertex(x1, y1, z1);
             } else {
                 if (texMode == 0) {
-                    g.vertex(x1, y1, z1, 1, 1);
+                    child.vertex(x1, y1, z1, 1, 1);
                 } else {
-                    g.vertex(x1, y1, z1, (tex.width / phiSteps) * i, (tex.height / thetaSteps) * i_stripNumber);
+                    child.vertex(x1, y1, z1, (tex.width / phiSteps) * i, (tex.height / thetaSteps) * i_stripNumber);
                 }
             }
 
             if (tex == null) {
-                g.vertex(x2, y2, z2);
+                child.vertex(x2, y2, z2);
             } else {
                 if (texMode == 0) {
-                    g.vertex(x2, y2, z2, (tex.width - 2) - 2, tex.height - 2);
+                    child.vertex(x2, y2, z2, (tex.width - 2) - 2, tex.height - 2);
                 } else {
-                    g.vertex(x2, y2, z2, (tex.width / phiSteps) * i, (tex.height / thetaSteps) * (i_stripNumber + 1));
+                    child.vertex(x2, y2, z2, (tex.width / phiSteps) * i, (tex.height / thetaSteps) * (i_stripNumber + 1));
                 }
             }
         }
-        g.endShape();
+        child.endShape();
+        shape.addChild(child);
+        return shape;
     }
 
     /**
      * This draws a vertical strip of the surface.
      *
-     * @param i_stripNumber The number of the Strip you wanna draw. The number must lie in
+     * @param i_stripNumber The number of the Strip you wanna getSurface. The number must lie in
      *                      between 0 and the phiSteps your surface was initialized with.
      */
-    public void drawVerticalStrip(final int i_stripNumber) {
-        drawVerticalSegment(i_stripNumber, 0, i_stripNumber + 1, thetaSteps);
+    public PShape getVerticalStrip(final int i_stripNumber) {
+        return getVerticalStrip(null, i_stripNumber);
+    }
+
+    private PShape getVerticalStrip(PShape shape, final int i_stripNumber) {
+        return getVerticalSegment(shape, i_stripNumber, 0, i_stripNumber + 1, thetaSteps);
     }
 
     /**
-     * @param i_stripNumber     The number of the Strip you wanna draw. The number must lie in
+     * @param i_stripNumber     The number of the Strip you wanna getSurface. The number must lie in
      *                          between 0 and the phiSteps your surface was initialized with.
      * @param i_startIndexTheta The number must lie in between 0 and the thetaSteps your
      *                          surface was initialized with.
      * @param i_endIndexTheta   The number must lie in between i_startIndexTheta and and the
      *                          thetaSteps your surface was initialized with.
      */
-    public void drawVerticalStrip(final int i_stripNumber, final int i_startIndexTheta, final int i_endIndexTheta) {
-        drawVerticalSegment(i_stripNumber, i_startIndexTheta, i_stripNumber + 1, i_endIndexTheta);
+    public PShape drawVerticalStrip(final int i_stripNumber, final int i_startIndexTheta, final int i_endIndexTheta) {
+        return getVerticalSegment(i_stripNumber, i_startIndexTheta, i_stripNumber + 1, i_endIndexTheta);
     }
 
     /**
@@ -904,8 +964,8 @@ public class Surface {
      *                      was initialized with.
      * @param i_radius      The radius of the inner surface.
      */
-    public void drawVerticalStrip(final int i_stripNumber, final float i_radius) {
-        drawVerticalSegment(i_stripNumber, 0, thetaSteps, i_radius);
+    public PShape getVerticalStrip(final int i_stripNumber, final float i_radius) {
+        return getVerticalSegment(i_stripNumber, 0, thetaSteps, i_radius);
     }
 
     /**
@@ -919,8 +979,8 @@ public class Surface {
      *                          thetaSteps your surface was initialized with.
      * @param i_radius          The radius of the inner surface.
      */
-    public void drawVerticalStrip(final int i_stripeNumber, final int i_startIndexTheta, final int i_endIndexTheta, final float i_radius) {
-        drawVerticalSegment(i_stripeNumber, i_startIndexTheta, i_endIndexTheta, i_radius);
+    public PShape getVerticalStrip(final int i_stripeNumber, final int i_startIndexTheta, final int i_endIndexTheta, final float i_radius) {
+        return getVerticalSegment(i_stripeNumber, i_startIndexTheta, i_endIndexTheta, i_radius);
     }
 
     /**
@@ -935,15 +995,27 @@ public class Surface {
      * @param i_endIndexTheta   The number must lie in between i_startIndexTheta and and the
      *                          thetaSteps your surface was initialized with.
      */
-    public void drawVerticalSegment(int i_startIndexPhi, int i_startIndexTheta, int i_endIndexPhi, int i_endIndexTheta) {
+    public PShape getVerticalSegment(int i_startIndexPhi, int i_startIndexTheta, int i_endIndexPhi, int i_endIndexTheta) {
+        return getVerticalSegment(null, i_startIndexPhi, i_startIndexTheta, i_endIndexPhi, i_endIndexTheta);
+    }
+
+    private PShape getVerticalSegment(PShape shape, int i_startIndexPhi, int i_startIndexTheta, int i_endIndexPhi, int i_endIndexTheta) {
+        if (shape == null) {
+            shape = createShape();
+        }
+
+        PShape child = p.createShape();
+
         i_startIndexPhi = Math.max(0, i_startIndexPhi);
         i_startIndexTheta = Math.max(0, i_startIndexTheta);
         i_endIndexPhi = Math.min(i_endIndexPhi, phiSteps - phiSub);
         i_endIndexTheta = Math.min(i_endIndexTheta, thetaSteps);
 
-        g.beginShape(PConstants.QUAD_STRIP);
+        child.beginShape(PConstants.QUAD_STRIP);
+        child.noStroke();
+
         if (tex != null)
-            g.texture(tex);
+            child.texture(tex);
         PVector[][] normals = null;
         if (mesh != null) {
             normals = mesh.normals;
@@ -952,7 +1024,7 @@ public class Surface {
             for (int j = i_startIndexTheta; j < i_endIndexTheta; j++) {
 
                 int nextI = i + 1;
-                if (nextI > phiSteps - 2)
+                if (nextI > phiSteps - phiSub)
                     nextI = 0;
 
                 float x1 = coords[i][j][0] * (xScale + pointScaleDifference[i][j][0]);
@@ -965,51 +1037,45 @@ public class Surface {
 
                 float tx, ty;
                 if (colors != null) {
-                    if (g.fill)
-                        g.fill(colors[i][j]);
-                    if (g.stroke)
-                        g.stroke(colors[i][j]);
+                    child.fill(colors[i][j]);
                     if (tex != null) {
-                        g.tint(colors[i][j]);
+                        child.tint(colors[i][j]);
                     }
                 }
 
                 if (normals != null) {
                     PVector n = normals[i][j];
-                    g.normal(n.x, n.y, n.z);
+                    child.normal(n.x, n.y, n.z);
                 }
                 if (tex == null) {
-                    g.vertex(x1, y1, z1);
+                    child.vertex(x1, y1, z1);
                 } else {
                     tx = tex.width / ((float) phiSteps) * i;
                     ty = tex.height / ((float) thetaSteps) * j;
                     if (texMode == 0) {
-                        g.vertex(x1, y1, z1, 1, (tex.height - 3) * (j % 2) + 1);
+                        child.vertex(x1, y1, z1, 1, (tex.height - 3) * (j % 2) + 1);
                     } else {
-                        g.vertex(x1, y1, z1, tx, ty);
+                        child.vertex(x1, y1, z1, tx, ty);
                     }
                 }
 
                 if (colors != null) {
-                    if (g.fill)
-                        g.fill(colors[nextI][j]);
-                    if (g.stroke)
-                        g.stroke(colors[nextI][j]);
+                    child.fill(colors[nextI][j]);
                     if (tex != null) {
-                        g.tint(colors[i][j]);
+                        child.tint(colors[i][j]);
                     }
                 }
 
                 if (normals != null) {
                     PVector n = normals[nextI][j];
-                    g.normal(n.x, n.y, n.z);
+                    child.normal(n.x, n.y, n.z);
                 }
 
                 if (tex == null) {
-                    g.vertex(x2, y2, z2);
+                    child.vertex(x2, y2, z2);
                 } else {
                     if (texMode == 0) {
-                        g.vertex(x2, y2, z2, tex.width - 2, (tex.height - 3) * (j % 2) + 1);
+                        child.vertex(x2, y2, z2, tex.width - 2, (tex.height - 3) * (j % 2) + 1);
                     } else {
                         ty = tex.height / ((float) thetaSteps - 1) * j;
                         if (i == phiSteps - 2) {
@@ -1017,12 +1083,14 @@ public class Surface {
                         } else {
                             tx = tex.width / ((float) phiSteps - 1) * (i + 1);
                         }
-                        g.vertex(x2, y2, z2, tx, ty);
+                        child.vertex(x2, y2, z2, tx, ty);
                     }
                 }
             }
         }
-        g.endShape();
+        child.endShape();
+        shape.addChild(child);
+        return shape;
     }
 
     /**
@@ -1036,14 +1104,30 @@ public class Surface {
      *                          thetaSteps your surface was initialized with.
      * @param i_radius          inner radius
      */
-    public void drawVerticalSegment(final int i_startIndexPhi, int i_startIndexTheta, int i_endIndexTheta, final float i_radius) {
+    public PShape getVerticalSegment(final int i_startIndexPhi, int i_startIndexTheta, int i_endIndexTheta, final float i_radius) {
+        return getVerticalSegment(null, i_startIndexPhi, i_startIndexTheta, i_endIndexTheta, i_radius);
+    }
+
+    public PShape getVerticalStrip(PShape shape, final int i_startIndexPhi, int i_startIndexTheta, int i_endIndexTheta, final float i_radius) {
+        return getVerticalSegment(shape, i_startIndexPhi, i_startIndexTheta, i_endIndexTheta, i_radius);
+    }
+
+    public PShape getVerticalSegment(PShape shape, final int i_startIndexPhi, int i_startIndexTheta, int i_endIndexTheta, final float i_radius) {
+
+        if (shape == null) {
+            shape = createShape();
+        }
+        PShape child = p.createShape();
+
         int i = Math.min(Math.max(0, i_startIndexPhi), phiSteps - 1);
         i_startIndexTheta = Math.max(0, i_startIndexTheta);
         i_endIndexTheta = Math.min(i_endIndexTheta, thetaSteps);
 
-        g.beginShape(PConstants.QUAD_STRIP);
+        child.beginShape(PConstants.QUAD_STRIP);
+        child.noStroke();
+
         if (tex != null)
-            g.texture(tex);
+            child.texture(tex);
         for (int j = i_startIndexTheta; j < i_endIndexTheta; j++) {
 
             float x1 = coords[i][j][0] * (xScale + pointScaleDifference[i][j][0]);
@@ -1056,32 +1140,29 @@ public class Surface {
 
             float tx, ty;
             if (colors != null) {
-                if (g.fill)
-                    g.fill(colors[i][j]);
-                if (g.stroke)
-                    g.stroke(colors[i][j]);
+                child.fill(colors[i][j]);
                 if (tex != null) {
-                    g.tint(colors[i][j]);
+                    child.tint(colors[i][j]);
                 }
 
             }
             if (tex == null) {
-                g.vertex(x1, y1, z1);
+                child.vertex(x1, y1, z1);
             } else {
                 if (texMode == 0) {
-                    g.vertex(x1, y1, z1, 1, tex.height * (j % 2) + 1);
+                    child.vertex(x1, y1, z1, 1, tex.height * (j % 2) + 1);
                 } else {
                     tx = tex.width / ((float) phiSteps - 1) * i;
                     ty = tex.height / ((float) thetaSteps - 1) * j;
-                    g.vertex(x1, y1, z1, tx, ty);
+                    child.vertex(x1, y1, z1, tx, ty);
                 }
             }
 
             if (tex == null) {
-                g.vertex(x2, y2, z2);
+                child.vertex(x2, y2, z2);
             } else {
                 if (texMode == 0) {
-                    g.vertex(x2, y2, z2, tex.width - 2, tex.height * (j % 2) - 2);
+                    child.vertex(x2, y2, z2, tex.width - 2, tex.height * (j % 2) - 2);
                 } else {
                     ty = tex.height / ((float) thetaSteps - 1) * j;
                     if (i == phiSteps - 2) {
@@ -1089,12 +1170,14 @@ public class Surface {
                     } else {
                         tx = tex.width / ((float) phiSteps - 1) * (i + 1);
                     }
-                    g.vertex(x2, y2, z2, tx, ty);
+                    child.vertex(x2, y2, z2, tx, ty);
                 }
 
             }
         }
-        g.endShape();
+        child.endShape();
+        shape.addChild(child);
+        return shape;
     }
 
     /**
@@ -1104,8 +1187,8 @@ public class Surface {
      *                      surface was initialized with.
      * @param i_radius      inner radius
      */
-    public void drawHorizontalPipe(final int i_stripNumber, final float i_radius) {
-        drawHorizontalPipeSegment(0, i_stripNumber, phiSteps, i_stripNumber + 1, i_radius);
+    public PShape drawHorizontalPipe(final int i_stripNumber, final float i_radius) {
+        return drawHorizontalPipeSegment(0, i_stripNumber, phiSteps, i_stripNumber + 1, i_radius);
     }
 
     /**
@@ -1117,8 +1200,8 @@ public class Surface {
      *                          phiSteps your surface was initialized with.
      * @param i_radius          inner radiuss
      */
-    public void drawHorizontalPipe(final int i_startIndexTheta, final int i_startIndexPhi, final int i_endIndexPhi, final float i_radius) {
-        drawHorizontalPipeSegment(i_startIndexPhi, i_startIndexTheta, i_endIndexPhi, i_startIndexTheta + 2, i_radius);
+    public PShape drawHorizontalPipe(final int i_startIndexTheta, final int i_startIndexPhi, final int i_endIndexPhi, final float i_radius) {
+        return drawHorizontalPipeSegment(i_startIndexPhi, i_startIndexTheta, i_endIndexPhi, i_startIndexTheta + 2, i_radius);
     }
 
     /**
@@ -1128,8 +1211,8 @@ public class Surface {
      *                      was initialized with.
      * @param i_radius      inner radius
      */
-    public void drawVerticalPipe(final int i_stripNumber, final float i_radius) {
-        drawVerticalPipeSegment(i_stripNumber, 0, i_stripNumber + 1, thetaSteps, i_radius);
+    public PShape drawVerticalPipe(final int i_stripNumber, final float i_radius) {
+        return drawVerticalPipeSegment(i_stripNumber, 0, i_stripNumber + 1, thetaSteps, i_radius);
     }
 
     /**
@@ -1143,8 +1226,8 @@ public class Surface {
      *                          thetaSteps your surface was initialized with.
      * @param i_radius          inner radiuss
      */
-    public void drawVerticalPipe(final int i_startIndexPhi, final int i_startIndexTheta, final int i_endIndexTheta, final float i_radius) {
-        drawVerticalPipeSegment(i_startIndexPhi, i_startIndexTheta, i_startIndexPhi + 1, i_endIndexTheta, i_radius);
+    public PShape drawVerticalPipe(final int i_startIndexPhi, final int i_startIndexTheta, final int i_endIndexTheta, final float i_radius) {
+        return drawVerticalPipeSegment(i_startIndexPhi, i_startIndexTheta, i_startIndexPhi + 1, i_endIndexTheta, i_radius);
     }
 
     /**
@@ -1160,84 +1243,89 @@ public class Surface {
      *                          thetaSteps your surface was initialized with.
      * @param i_radius          inner radius
      */
-    public void drawHorizontalPipeSegment(int i_startIndexPhi, int i_startIndexTheta, int i_endIndexPhi, int i_endIndexTheta, final float i_radius) {
+    public PShape drawHorizontalPipeSegment(int i_startIndexPhi, int i_startIndexTheta, int i_endIndexPhi, int i_endIndexTheta, final float i_radius) {
         i_startIndexPhi = Math.max(0, i_startIndexPhi);
         i_startIndexTheta = Math.max(0, i_startIndexTheta);
         i_endIndexPhi = Math.min(i_endIndexPhi, phiSteps);
         i_endIndexTheta = Math.min(i_endIndexTheta, thetaSteps);
-        drawVerticalStrip(i_startIndexPhi, i_startIndexTheta, i_endIndexTheta, i_radius);
-        drawVerticalStrip(i_endIndexPhi, i_startIndexTheta, i_endIndexTheta, i_radius);
-        drawHorizontalStrip(i_startIndexTheta, i_startIndexPhi, i_endIndexPhi, i_radius);
-        drawHorizontalStrip(i_endIndexTheta - 1, i_startIndexPhi, i_endIndexPhi + 1, i_radius);
-        drawPart(i_startIndexPhi, i_endIndexPhi, i_startIndexTheta, i_endIndexTheta - 1);
+
+        PShape shape = createShape();
+
+        getVerticalStrip(shape, i_startIndexPhi, i_startIndexTheta, i_endIndexTheta, i_radius);
+        getVerticalStrip(shape, i_endIndexPhi, i_startIndexTheta, i_endIndexTheta, i_radius);
+        getHorizontalStrip(shape, i_startIndexTheta, i_startIndexPhi, i_endIndexPhi, i_radius);
+        getHorizontalStrip(shape, i_endIndexTheta - 1, i_startIndexPhi, i_endIndexPhi + 1, i_radius);
+        getPart(shape, i_startIndexPhi, i_endIndexPhi, i_startIndexTheta, i_endIndexTheta - 1);
         xScale += i_radius;
         yScale += i_radius;
         zScale += i_radius;
-        drawPart(i_startIndexPhi, i_endIndexPhi, i_startIndexTheta, Math.max(i_startIndexTheta, i_endIndexTheta - 1));
+        getPart(shape, i_startIndexPhi, i_endIndexPhi, i_startIndexTheta, Math.max(i_startIndexTheta, i_endIndexTheta - 1));
         xScale -= i_radius;
         yScale -= i_radius;
         zScale -= i_radius;
-
+        return shape;
     }
 
-    public void drawVerticalPipeSegment(int i_startIndexPhi, int i_startIndexTheta, int i_endIndexPhi, int i_endIndexTheta, final float i_radius) {
+    public PShape drawVerticalPipeSegment(int i_startIndexPhi, int i_startIndexTheta, int i_endIndexPhi, int i_endIndexTheta, final float i_radius) {
+
         i_startIndexPhi = Math.max(0, i_startIndexPhi);
         i_startIndexTheta = Math.max(0, i_startIndexTheta);
         i_endIndexPhi = Math.min(i_endIndexPhi, phiSteps);
         i_endIndexTheta = Math.min(i_endIndexTheta, thetaSteps);
-        drawVerticalStrip(i_startIndexPhi, i_startIndexTheta, i_endIndexTheta, i_radius);
-        drawVerticalStrip(i_endIndexPhi, i_startIndexTheta, i_endIndexTheta, i_radius);
-        drawHorizontalStrip(i_startIndexTheta, i_startIndexPhi, i_endIndexPhi + 1, i_radius);
-        drawHorizontalStrip(i_endIndexTheta - 1, i_startIndexPhi, i_endIndexPhi + 1, i_radius);
-        drawPart(i_startIndexPhi, i_endIndexPhi, i_startIndexTheta, i_endIndexTheta - 1);
+        PShape shape = createShape();
+        getVerticalStrip(shape, i_startIndexPhi, i_startIndexTheta, i_endIndexTheta, i_radius);
+        getVerticalStrip(shape, i_endIndexPhi, i_startIndexTheta, i_endIndexTheta, i_radius);
+        getHorizontalStrip(shape, i_startIndexTheta, i_startIndexPhi, i_endIndexPhi + 1, i_radius);
+        getHorizontalStrip(shape, i_endIndexTheta - 1, i_startIndexPhi, i_endIndexPhi + 1, i_radius);
+        getPart(shape, i_startIndexPhi, i_endIndexPhi, i_startIndexTheta, i_endIndexTheta - 1);
         xScale += i_radius;
         yScale += i_radius;
         zScale += i_radius;
-        drawPart(i_startIndexPhi, i_endIndexPhi, i_startIndexTheta, Math.max(i_startIndexTheta, i_endIndexTheta - 1));
+        getPart(shape, i_startIndexPhi, i_endIndexPhi, i_startIndexTheta, Math.max(i_startIndexTheta, i_endIndexTheta - 1));
         xScale -= i_radius;
         yScale -= i_radius;
         zScale -= i_radius;
-
+        return shape;
     }
 
     int color(int r, int g, int b) {
-        int i = (125 << 24) + (r << 16) + (g << 8) + (b);
-        return i;
+        return (125 << 24) + (r << 16) + (g << 8) + (b);
     }
 
 	/*
      * public void drawHorizontalPipeSegment(int i_startIndexPhi, int
 	 * i_startIndexTheta, int i_endIndexPhi, int i_endIndexTheta, final float
 	 * i_radius) {
-	 * 
+	 *
 	 * i_startIndexPhi = Math.max(0, i_startIndexPhi); i_startIndexTheta =
 	 * Math.max(0, i_startIndexTheta); i_endIndexPhi = Math.min(i_endIndexPhi,
 	 * phiSteps); i_endIndexTheta = Math.min(i_endIndexTheta, thetaSteps);
-	 * 
-	 * drawHorizontalStrip(i_endIndexTheta, i_startIndexPhi, i_startIndexTheta,
-	 * i_radius); drawVerticalStrip(i_startIndexPhi + 1, i_startIndexTheta,
+	 *
+	 * getHorizontalStrip(i_endIndexTheta, i_startIndexPhi, i_startIndexTheta,
+	 * i_radius); getVerticalStrip(i_startIndexPhi + 1, i_startIndexTheta,
 	 * i_endIndexTheta, i_radius);
-	 * 
-	 * drawHorizontalSegment(i_startIndexTheta, i_startIndexPhi, i_startIndexPhi +
-	 * 2, i_radius); drawHorizontalSegment(i_endIndexTheta - 1, i_startIndexPhi,
+	 *
+	 * getHorizontalSegment(i_startIndexTheta, i_startIndexPhi, i_startIndexPhi +
+	 * 2, i_radius); getHorizontalSegment(i_endIndexTheta - 1, i_startIndexPhi,
 	 * i_startIndexPhi + 2, i_radius);
-	 * 
-	 * drawVerticalStrip(i_startIndexPhi, i_startIndexTheta, i_endIndexTheta);
+	 *
+	 * getVerticalStrip(i_startIndexPhi, i_startIndexTheta, i_endIndexTheta);
 	 * xScale += i_radius; yScale += i_radius; zScale += i_radius;
-	 * drawVerticalStrip(i_startIndexPhi, i_startIndexTheta, i_endIndexTheta);
+	 * getVerticalStrip(i_startIndexPhi, i_startIndexTheta, i_endIndexTheta);
 	 * xScale -= i_radius; yScale -= i_radius; zScale -= i_radius; }
 	 */
 
     /**
      * Draws all horizontal lines on your surface.
-     *
      */
-    public void drawHorizontalLines() {
+    public PShape drawHorizontalLines() {
+        PShape shape = createShape();
         for (int i = 0; i < phiSteps - 1; i++) {
             for (int j = 0; j < thetaSteps - 1; j++) {
-                drawHorizontalLineSegment(i, j);
+                getHorizontalLineSegment(shape, i, j);
             }
         }
+        return shape;
     }
 
     /**
@@ -1256,12 +1344,14 @@ public class Surface {
      * @param i_stepTheta       The steps size for theta; if j is 1 every segment will be
      *                          drawn if its 2 only every second an so on
      */
-    public void drawHorizontalLinePart(final int i_startIndexPhi, final int i_endIndexPhi, final int i_startIndexTheta, final int i_endIndexTheta, final int i_stepPhi, final int i_stepTheta) {
+    public PShape getHorizontalLinePart(final int i_startIndexPhi, final int i_endIndexPhi, final int i_startIndexTheta, final int i_endIndexTheta, final int i_stepPhi, final int i_stepTheta) {
+        PShape shape = createShape();
         for (int i = i_startIndexPhi; i < i_endIndexPhi; i += i_stepPhi) {
             for (int j = i_startIndexTheta; j < i_endIndexTheta; j += i_stepTheta) {
-                drawHorizontalLineSegment(i, j);
+                getHorizontalLineSegment(shape, i, j);
             }
         }
+        return shape;
     }
 
     /**
@@ -1271,10 +1361,14 @@ public class Surface {
      * @param i_phiIndex The number must lie in between 0 and the phiSteps your surface
      *                   was initialized with.
      */
-    public void drawHorizontalLineStrip(final int i_phiIndex) {
+    public PShape getHorizontalLineStrip(final int i_phiIndex) {
+        PShape shape = createShape();
         for (int j = 0; j < thetaSteps - 1; j++) {
-            drawHorizontalLineSegment(i_phiIndex, j);
+            PShape child = p.createShape(PConstants.GROUP);
+            getHorizontalLineSegment(child, i_phiIndex, j);
+            shape.addChild(child);
         }
+        return shape;
     }
 
     /**
@@ -1288,10 +1382,12 @@ public class Surface {
      * @param i_endIndexTheta   The number must lie in between i_startIndexTheta and the
      *                          thetaSteps your surface was initialized with.
      */
-    public void drawHorizontalLineStrip(final int i_phiIndex, final int i_startIndexTheta, final int i_endIndexTheta) {
+    public PShape drawHorizontalLineStrip(final int i_phiIndex, final int i_startIndexTheta, final int i_endIndexTheta) {
+        PShape shape = createShape();
         for (int j = i_startIndexTheta; j < i_endIndexTheta; j++) {
-            drawHorizontalLineSegment(i_phiIndex - 1, j);
+            getHorizontalLineSegment(shape, i_phiIndex - 1, j);
         }
+        return shape;
     }
 
     /**
@@ -1305,12 +1401,16 @@ public class Surface {
      * @param i_thetaIndex The number must lie in between 0 and the thetaSteps your
      *                     surface was initialized with.
      */
-    public void drawHorizontalLineSegment(int i_phiIndex, int i_thetaIndex) {
+    public PShape getHorizontalLineSegment(PShape shape, int i_phiIndex, int i_thetaIndex) {
         i_phiIndex = Math.max(0, Math.min(i_phiIndex, phiSteps - phiSub));
         i_thetaIndex = Math.max(0, Math.min(i_thetaIndex, thetaSteps - 1));
-        int saveFill = g.fillColor;
-        g.beginShape();
-        g.noFill();
+
+        if (shape == null) {
+            shape = createShape();
+        }
+        PShape child = p.createShape();
+
+        child.beginShape(PConstants.LINES);
         int nextJ;
 
         if (i_thetaIndex >= thetaSteps - 1) {
@@ -1328,30 +1428,31 @@ public class Surface {
         float z2 = coords[i_phiIndex][nextJ][2] * (zScale + pointScaleDifference[i_phiIndex][nextJ][2]);
 
         if (colors != null) {
-            if (g.stroke)
-                g.stroke(colors[i_phiIndex][i_thetaIndex]);
+            child.stroke(colors[i_phiIndex][i_thetaIndex]);
         }
-        g.vertex(x1, y1, z1);
+        child.vertex(x1, y1, z1);
         if (colors != null) {
-            if (g.stroke)
-                g.stroke(colors[i_phiIndex][nextJ]);
+            child.stroke(colors[i_phiIndex][nextJ]);
         }
-        g.vertex(x2, y2, z2);
+        child.vertex(x2, y2, z2);
 
-        g.endShape();
-        g.fill(saveFill);
+        child.endShape();
+
+        shape.addChild(child);
+        return shape;
     }
 
     /**
      * Draws all vertical lines on your surface.
-     *
      */
-    public void drawVerticalLines() {
+    public PShape getVerticalLines() {
+        PShape shape = createShape();
         for (int i = 0; i < phiSteps - 1; i++) {
             for (int j = 0; j < thetaSteps - 1; j++) {
-                drawVerticalLineSegment(i, j);
+                getVerticalLineSegment(shape, i, j);
             }
         }
+        return shape;
     }
 
     /**
@@ -1361,10 +1462,14 @@ public class Surface {
      * @param i_thetaIndex The number must lie in between 0 and the thetaSteps your
      *                     surface was initialized with.
      */
-    public void drawVerticalLineStrip(final int i_thetaIndex) {
+    public PShape getVerticalLineStrip(final int i_thetaIndex) {
+        PShape shape = createShape();
         for (int i = 0; i < phiSteps - 1; i++) {
-            drawVerticalLineSegment(i, i_thetaIndex);
+            PShape child = p.createShape(PConstants.GROUP);
+            getVerticalLineSegment(child, i, i_thetaIndex);
+            shape.addChild(child);
         }
+        return shape;
     }
 
     /**
@@ -1378,10 +1483,12 @@ public class Surface {
      * @param i_thetaIndex    The number must lie in between 0 and the thetaSteps your
      *                        surface was initialized with.
      */
-    public void drawVerticalLineStrip(final int i_thetaIndex, final int i_startPhiIndex, final int i_endPhiIndex) {
+    public PShape drawVerticalLineStrip(final int i_thetaIndex, final int i_startPhiIndex, final int i_endPhiIndex) {
+        PShape shape = createShape();
         for (int i = i_startPhiIndex; i < i_endPhiIndex; i++) {
-            drawVerticalLineSegment(i, i_thetaIndex);
+            getVerticalLineSegment(shape, i, i_thetaIndex);
         }
+        return shape;
     }
 
     /**
@@ -1395,12 +1502,16 @@ public class Surface {
      * @param i_thetaIndex The number must lie in between 0 and the thetaSteps your
      *                     surface was initialized with.
      */
-    public void drawVerticalLineSegment(int i_phiIndex, int i_thetaIndex) {
+    public PShape getVerticalLineSegment(PShape shape, int i_phiIndex, int i_thetaIndex) {
         i_phiIndex = Math.max(0, Math.min(i_phiIndex, phiSteps - phiSub));
         i_thetaIndex = Math.max(0, Math.min(i_thetaIndex, thetaSteps - 1));
-        int saveFill = g.fillColor;
-        g.noFill();
-        g.beginShape();
+
+        if (shape == null) {
+            shape = createShape();
+        }
+        PShape child = p.createShape();
+
+        child.beginShape(PConstants.LINES);
         int nextI;
         // int nextJ;
         if (i_phiIndex >= phiSteps - 1) {
@@ -1418,18 +1529,16 @@ public class Surface {
         float z2 = coords[nextI][i_thetaIndex][2] * (zScale + pointScaleDifference[nextI][i_thetaIndex][2]);
 
         if (colors != null) {
-            if (g.stroke)
-                g.stroke(colors[i_phiIndex][i_thetaIndex]);
+            child.stroke(colors[i_phiIndex][i_thetaIndex]);
         }
-        g.vertex(x1, y1, z1);
+        child.vertex(x1, y1, z1);
         if (colors != null) {
-            if (g.stroke)
-                g.stroke(colors[nextI][i_thetaIndex]);
+            child.stroke(colors[nextI][i_thetaIndex]);
         }
-        g.vertex(x2, y2, z2);
-        g.endShape();
-
-        g.fill(saveFill);
+        child.vertex(x2, y2, z2);
+        child.endShape();
+        shape.addChild(child);
+        return shape;
     }
 
     protected int phiSub = 1;

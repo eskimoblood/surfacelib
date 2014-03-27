@@ -1,5 +1,6 @@
 package surface;
 
+import processing.core.PApplet;
 import processing.core.PGraphics;
 import surface.calculation.IdentityTable;
 import surface.calculation.LookUpTable;
@@ -23,7 +24,7 @@ public class EnnepersSurface extends Surface {
     private LookUpTable pow3PhiTable;
 
     /**
-     * @param i_g          A PGraphics object where the surface should be drawn in.
+     * @param i_g          A PApplet object where the surface should be drawn in.
      *                     Mostly this is g, the current PGraphics object of your sketch.
      * @param i_phiSteps   The horizontal resolution of the surface.
      * @param i_thetaSteps The vertical resolution of the surface.
@@ -31,7 +32,7 @@ public class EnnepersSurface extends Surface {
      *                     You can also use [[[verticalColor1],[verticalColor2],...],null]) to get only an vertical gradient. Note that the the color stuff only work in the OPENGL mode.
      */
     public EnnepersSurface(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final int[][] i_colors) {
@@ -46,7 +47,7 @@ public class EnnepersSurface extends Surface {
     }
 
     public EnnepersSurface(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps) {
 

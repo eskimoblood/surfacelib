@@ -1,10 +1,11 @@
 package surface;
 
+import processing.core.PApplet;
 import processing.core.PGraphics;
 
 public class SuperShell extends SuperDuperShape {
 
-    public SuperShell(PGraphics i_g, int i_phiSteps, int i_thetaSteps) {
+    public SuperShell(PApplet i_g, int i_phiSteps, int i_thetaSteps) {
         this(
                 i_g,
                 i_phiSteps,
@@ -13,7 +14,7 @@ public class SuperShell extends SuperDuperShape {
         );
     }
 
-    public SuperShell(PGraphics i_g, int i_phiSteps, int i_thetaSteps, int[][] i_colors) {
+    public SuperShell(PApplet i_g, int i_phiSteps, int i_thetaSteps, int[][] i_colors) {
         this(
                 i_g,
                 i_phiSteps,
@@ -39,7 +40,7 @@ public class SuperShell extends SuperDuperShape {
     }
 
 
-    public SuperShell(PGraphics i_g, int i_phiSteps, int i_thetaSteps,
+    public SuperShell(PApplet i_g, int i_phiSteps, int i_thetaSteps,
                       float n1_1, float n1_2, float n1_3, float m1_1,
                       float n2_1, float n2_2, float n2_3, float m2_1,
                       float c1, float t2, float d1, float d2) {
@@ -52,7 +53,7 @@ public class SuperShell extends SuperDuperShape {
         );
     }
 
-    public SuperShell(PGraphics i_g, int i_phiSteps, int i_thetaSteps,
+    public SuperShell(PApplet i_g, int i_phiSteps, int i_thetaSteps,
                       SuperShapePreset r1,
                       SuperShapePreset r2,
                       float c1, float t2, float d1, float d2) {
@@ -65,7 +66,7 @@ public class SuperShell extends SuperDuperShape {
         );
     }
 
-    public SuperShell(PGraphics i_g, int i_phiSteps, int i_thetaSteps,
+    public SuperShell(PApplet i_g, int i_phiSteps, int i_thetaSteps,
                       SuperShapePreset r1,
                       SuperShapePreset r2,
                       float c1, float t2, float d1, float d2,
@@ -79,7 +80,7 @@ public class SuperShell extends SuperDuperShape {
         );
     }
 
-    public SuperShell(PGraphics i_g, int i_phiSteps, int i_thetaSteps,
+    public SuperShell(PApplet i_g, int i_phiSteps, int i_thetaSteps,
                       float n1_1, float n1_2, float n1_3, float m1_1,
                       float n2_1, float n2_2, float n2_3, float m2_1,
                       float c1, float t2, float d1, float d2,

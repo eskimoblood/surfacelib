@@ -1,5 +1,6 @@
 package surface;
 
+import processing.core.PApplet;
 import processing.core.PGraphics;
 import surface.calculation.LookUpTable;
 import surface.calculation.CosinusTable;
@@ -30,7 +31,7 @@ public class TrianguloidTrefoil extends Surface {
      *                     You can also use [[[verticalColor1],[verticalColor2],...],null]) to get only an vertical gradient. Note that the the color stuff only work in the OPENGL mode.
      */
     public TrianguloidTrefoil(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps,
             final int[][] i_colors) {
@@ -45,7 +46,7 @@ public class TrianguloidTrefoil extends Surface {
     }
 
     public TrianguloidTrefoil(
-            final PGraphics i_g,
+            final PApplet i_g,
             final int i_phiSteps,
             final int i_thetaSteps) {
 
