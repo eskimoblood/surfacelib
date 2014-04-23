@@ -823,9 +823,7 @@ public class Surface {
                 float z2 = coords[i][j + 1][2] * (zScale + pointScaleDifference[i][j + 1][2]);
 
 
-                if (colors != null) {
-                    child.fill(colors[i][j]);
-                }
+                fill(child, i, j);
                 if (normals != null) {
                     PVector n = normals[i][j];
                     child.normal(n.x, n.y, n.z);
@@ -840,9 +838,7 @@ public class Surface {
                     }
                 }
 
-                if (colors != null) {
-                    child.fill(colors[i][j + 1]);
-                }
+                fill(child, i, j + 1);
                 if (normals != null) {
                     PVector n = normals[i][j + 1];
                     child.normal(n.x, n.y, n.z);
@@ -856,12 +852,24 @@ public class Surface {
                         child.vertex(x2, y2, z2, (tex.width / ((float) phiSteps - 1)) * i, (tex.height / ((float) thetaSteps - 1)) * (j + 1));
                     }
                 }
-
             }
         }
         child.endShape();
         shape.addChild(child);
         return shape;
+    }
+
+    private void fill(PShape child, int i, int j) {
+        if (colors != null) {
+            child.fill(colors[i][j]);
+            if (tex != null) {
+                child.tint(colors[i][j]);
+            }
+        } else {
+            if (tex != null) {
+                child.tint(p.g.fillColor);
+            }
+        }
     }
 
     /**
@@ -1036,12 +1044,7 @@ public class Surface {
                 float z2 = coords[nextI][j][2] * (zScale + pointScaleDifference[nextI][j][2]);
 
                 float tx, ty;
-                if (colors != null) {
-                    child.fill(colors[i][j]);
-                    if (tex != null) {
-                        child.tint(colors[i][j]);
-                    }
-                }
+                fill(child,i,j);
 
                 if (normals != null) {
                     PVector n = normals[i][j];
@@ -1050,21 +1053,16 @@ public class Surface {
                 if (tex == null) {
                     child.vertex(x1, y1, z1);
                 } else {
-                    tx = tex.width / ((float) phiSteps) * i;
-                    ty = tex.height / ((float) thetaSteps) * j;
                     if (texMode == 0) {
                         child.vertex(x1, y1, z1, 1, (tex.height - 3) * (j % 2) + 1);
                     } else {
+                        tx = tex.width / ((float) phiSteps) * i;
+                        ty = tex.height / ((float) thetaSteps) * j;
                         child.vertex(x1, y1, z1, tx, ty);
                     }
                 }
 
-                if (colors != null) {
-                    child.fill(colors[nextI][j]);
-                    if (tex != null) {
-                        child.tint(colors[i][j]);
-                    }
-                }
+                fill(child, nextI, j);
 
                 if (normals != null) {
                     PVector n = normals[nextI][j];
@@ -1077,11 +1075,11 @@ public class Surface {
                     if (texMode == 0) {
                         child.vertex(x2, y2, z2, tex.width - 2, (tex.height - 3) * (j % 2) + 1);
                     } else {
-                        ty = tex.height / ((float) thetaSteps - 1) * j;
+                        ty = tex.height / ((float) thetaSteps) * j;
                         if (i == phiSteps - 2) {
                             tx = tex.width;
                         } else {
-                            tx = tex.width / ((float) phiSteps - 1) * (i + 1);
+                            tx = tex.width / ((float) phiSteps + 1) * nextI;
                         }
                         child.vertex(x2, y2, z2, tx, ty);
                     }
